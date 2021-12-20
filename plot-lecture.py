@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import math, sys
+from sklearn.metrics import mean_squared_error
 
 plt.rcParams['figure.constrained_layout.use'] = True
 
@@ -39,7 +40,7 @@ week = math.floor(7 * 24 * 60 * 60 / timestamp_interval)
 length = y.size - week - lag * week - q
 XX = y[q:q + length:stride]
 
-for i in range(0, lag):
+for i in range(1, lag):
     X = y[i * week + q:i * week + q + length:stride]
     XX = np.column_stack((XX, X))
 
@@ -64,6 +65,7 @@ from sklearn.linear_model import Ridge
 model = Ridge(fit_intercept=False).fit(XX[train], yy[train])
 print(model.intercept_, model.coef_)
 y_pred = model.predict(XX)
+print(math.sqrt(mean_squared_error(y_pred, yy)))
 plt.scatter(t, y, color='black')
 plt.scatter(tt, y_pred, color='red')
 plt.xlabel('time(days)')
