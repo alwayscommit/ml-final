@@ -6,7 +6,7 @@ import math, sys
 plt.rcParams['figure.constrained_layout.use'] = True
 
 # dublin_bikes = pd.read_csv('/content/drive/MyDrive/ML Final/dublinbikes_20200101_20200401.csv')
-canal_dock_df = pd.read_csv('/station_dataset/grand_canal_dock.csv',
+canal_dock_df = pd.read_csv('./station_dataset/grand_canal_dock.csv',
                             usecols=['TIME', 'AVAILABLE BIKES', 'BIKE STANDS'],
                             parse_dates=['TIME'], index_col="TIME")
 # kilmainham_lane = pd.read_csv('/content/drive/MyDrive/ML Final/kilmainham_lane.csv', usecols = [2,7], parse_dates=[1])
@@ -18,8 +18,8 @@ timestamp_array = pd.array(
 timestamp_interval = timestamp_array[1] - timestamp_array[0]  # 300 seconds, 5 minutes
 
 # start date, end date
-start = pd.to_datetime('01−01−2020', format='%d−%m−%Y')
-end = pd.to_datetime('31−03−2020', format='%d−%m−%Y')
+start = pd.to_datetime('04−02−2020', format='%d−%m−%Y')
+end = pd.to_datetime('14−03−2020', format='%d−%m−%Y')
 
 t_start = (pd.DatetimeIndex([start]).astype(np.int64) / 1000000000).values[0]
 t_end = (pd.DatetimeIndex([end]).astype(np.int64) / 1000000000).values[0]
@@ -32,23 +32,29 @@ y = np.extract([(timestamp_array.to_numpy() >= t_start) & (timestamp_array.to_nu
     np.int64)
 
 q = 10
-lag = 3;
+lag = 3
 stride = 1
-w = math.floor(7 * 24 * 60 * 60 / timestamp_interval)  # number of samples per week
-length = y.size - w - lag * w - q
+# number of samples per week
+week = math.floor(7 * 24 * 60 * 60 / timestamp_interval)
+length = y.size - week - lag * week - q
 XX = y[q:q + length:stride]
-for i in range(1, lag):
-    X = y[i * w + q:i * w + q + length:stride]
-XX = np.column_stack((XX, X))
-d = math.floor(24 * 60 * 60 / timestamp_interval)  # number of samples per day
+
+for i in range(0, lag):
+    X = y[i * week + q:i * week + q + length:stride]
+    XX = np.column_stack((XX, X))
+
+# number of samples per day
+d = math.floor(24 * 60 * 60 / timestamp_interval)
 for i in range(0, lag):
     X = y[i * d + q:i * d + q + length:stride]
-XX = np.column_stack((XX, X))
+    XX = np.column_stack((XX, X))
+
 for i in range(0, lag):
     X = y[i:i + length:stride]
-XX = np.column_stack((XX, X))
-yy = y[lag * w + w + q:lag * w + w + q + length:stride]
-tt = t[lag * w + w + q:lag * w + w + q + length:stride]
+    XX = np.column_stack((XX, X))
+
+yy = y[lag * week + week + q:lag * week + week + q + length:stride]
+tt = t[lag * week + week + q:lag * week + week + q + length:stride]
 from sklearn.model_selection import train_test_split
 
 train, test = train_test_split(np.arange(0, yy.size), test_size=0.2)
@@ -64,4 +70,5 @@ plt.xlabel('time(days)')
 plt.ylabel('  # bikes')
 plt.legend(['training data', 'predictions'], loc='upper right')
 day = math.floor(24 * 60 * 60 / timestamp_interval)  # number of samples per day
+plt.xlim((4 * 7, 4 * 7 + 4))
 plt.show()
