@@ -32,7 +32,7 @@ t = (t - t[0]) / 60 / 60 / 24
 y = np.extract([(timestamp_array.to_numpy() >= t_start) & (timestamp_array.to_numpy() <= t_end)], df.iloc[:, 1]).astype(
     np.int64)
 
-q = 10
+q = 2
 lag = 3
 stride = 1
 # number of samples per week
@@ -40,17 +40,17 @@ week = math.floor(7 * 24 * 60 * 60 / timestamp_interval)
 length = y.size - week - lag * week - q
 XX = y[q:q + length:stride]
 
-for i in range(1, lag):
-    X = y[i * week + q:i * week + q + length:stride]
-    XX = np.column_stack((XX, X))
+# for i in range(1, lag):
+    # X = y[i * week + q:i * week + q + length:stride]
+    # XX = np.column_stack((XX, X))
 
 # number of samples per day
-d = math.floor(24 * 60 * 60 / timestamp_interval)
-for i in range(0, lag):
-    X = y[i * d + q:i * d + q + length:stride]
-    XX = np.column_stack((XX, X))
+# d = math.floor(24 * 60 * 60 / timestamp_interval)
+# for i in range(0, lag):
+    # X = y[i * d + q:i * d + q + length:stride]
+    # XX = np.column_stack((XX, X))
 
-for i in range(0, lag):
+for i in range(1, lag):
     X = y[i:i + length:stride]
     XX = np.column_stack((XX, X))
 
@@ -72,5 +72,5 @@ plt.xlabel('time(days)')
 plt.ylabel('  # bikes')
 plt.legend(['training data', 'predictions'], loc='upper right')
 day = math.floor(24 * 60 * 60 / timestamp_interval)  # number of samples per day
-plt.xlim((4 * 7, 4 * 7 + 4))
+# plt.xlim((4 * 7, 4 * 7 + 4))
 plt.show()
