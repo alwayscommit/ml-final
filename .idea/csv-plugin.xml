@@ -3,7 +3,21 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+        <entry key="\grand-canal-dock-dataset-12-step_288.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\grand-canal-dock-dataset-2-step.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\grand-canal-dock-dataset-2-step_288.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
