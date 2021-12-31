@@ -3,14 +3,36 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+<<<<<<< HEAD
         <entry key="\2-step_prof.csv">
+=======
+        <entry key="\grand-canal-dock-dataset-12-step_288.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\grand-canal-dock-dataset-2-step.csv">
+>>>>>>> 9ea1fb3866170058dffad984e26660484b7bb450
           <value>
             <Attribute>
               <option name="separator" value=":" />
             </Attribute>
           </value>
         </entry>
+<<<<<<< HEAD
         <entry key="\21-step_prof.csv">
+=======
+        <entry key="\grand-canal-dock-dataset-2-step_288.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\grand-canal-dock-dataset-6-step.csv">
+>>>>>>> 9ea1fb3866170058dffad984e26660484b7bb450
           <value>
             <Attribute>
               <option name="separator" value="," />
