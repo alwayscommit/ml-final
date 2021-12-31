@@ -17,6 +17,7 @@ df = canal_dock_df
 timestamp_array = pd.array(
     pd.DatetimeIndex(df.index).astype(np.int64)) / 1000000000  # convert nanoseconds to seconds
 timestamp_interval = timestamp_array[1] - timestamp_array[0]  # 300 seconds, 5 minutes
+timestamp_date = np.datetime_as_string(df.index, timezone='UTC')
 
 # start date, end date
 start = pd.to_datetime('04−02−2020', format='%d−%m−%Y')
@@ -38,39 +39,60 @@ stride = 1
 # number of samples per week
 week = math.floor(7 * 24 * 60 * 60 / timestamp_interval)
 length = y.size - week - lag * week - q
+XXDate = timestamp_date[q:q + length:stride]
 XX = y[q:q + length:stride]
-
-# for i in range(1, lag):
-    # X = y[i * week + q:i * week + q + length:stride]
-    # XX = np.column_stack((XX, X))
-
-# number of samples per day
-# d = math.floor(24 * 60 * 60 / timestamp_interval)
-# for i in range(0, lag):
-    # X = y[i * d + q:i * d + q + length:stride]
-    # XX = np.column_stack((XX, X))
+XXDate = np.column_stack((XXDate, XX))
 
 for i in range(1, lag):
+    X = y[i * week + q:i * week + q + length:stride]
+    XX = np.column_stack((XX, X))
+    XDate = timestamp_date[i * week + q:i * week + q + length:stride]
+    # XXDate = np.column_stack((XXDate, XDate))
+    # XXDate = np.column_stack((XXDate, X))
+
+# number of samples per day
+d = math.floor(24 * 60 * 60 / timestamp_interval)
+for i in range(0, lag):
+    X = y[i * d + q:i * d + q + length:stride]
+    XX = np.column_stack((XX, X))
+    XDate = timestamp_date[i * d + q:i * d + q + length:stride]
+    # XXDate = np.column_stack((XXDate, XDate))
+    # XXDate = np.column_stack((XXDate, X))
+
+for i in range(0, 1):
     X = y[i:i + length:stride]
     XX = np.column_stack((XX, X))
+    XDate = timestamp_date[i:i + length:stride]
+    XXDate = np.column_stack((XXDate, XDate))
+    XXDate = np.column_stack((XXDate, X))
 
 yy = y[lag * week + week + q:lag * week + week + q + length:stride]
 tt = t[lag * week + week + q:lag * week + week + q + length:stride]
+X11 = timestamp_date[lag * week + week + q:lag * week + week + q + length:stride]
+XXDate = np.column_stack((XXDate, X11))
+XXDate = np.column_stack((XXDate, yy))
+
+feature_df = pd.DataFrame(XXDate,
+                          columns=['Time (q:q+length)', 'q:q+length', 'Time (0:0+length)', '0:0+length',
+                                   # 'Time (1:1+length)', '1:1+length', 'Time (2:2+length)', '2:2+length',
+                                   'Time (2016+q:2016+q+length)', '2016+q:2016+q+length'])
+feature_df.to_csv('21-step_prof.csv')
+
 from sklearn.model_selection import train_test_split
 
 train, test = train_test_split(np.arange(0, yy.size), test_size=0.2)
 # train = np.arange(0,yy.size)
 from sklearn.linear_model import Ridge
 
-model = Ridge(fit_intercept=False).fit(XX[train], yy[train])
+model = Ridge(fit_intercept=True).fit(XX[train], yy[train])
 print(model.intercept_, model.coef_)
 y_pred = model.predict(XX)
 print(math.sqrt(mean_squared_error(y_pred, yy)))
 plt.scatter(t, y, color='black')
 plt.scatter(tt, y_pred, color='red')
 plt.xlabel('time(days)')
-plt.ylabel('  # bikes')
+plt.ylabel('#bikes')
 plt.legend(['training data', 'predictions'], loc='upper right')
 day = math.floor(24 * 60 * 60 / timestamp_interval)  # number of samples per day
-# plt.xlim((4 * 7, 4 * 7 + 4))
+plt.xlim((4 * 7, 4 * 7 + 4))
 plt.show()
