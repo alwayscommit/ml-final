@@ -37,7 +37,7 @@ def select_features(station_df):
 
     # add a day of week column
     df['DAY_OF_WEEK'] = df.index.dayofweek
-    df = df[df['DAY_OF_WEEK'] < 5]
+    # df = df[df['DAY_OF_WEEK'] < 5]
 
     return df
 
@@ -77,11 +77,11 @@ def extract_feature_set(original_df, step_size):
 
     for i in range(1, 5):
         col_name = 'k-' + str(i) + 'w'
-        df[col_name + '-TIME'] = df["TIME"].shift((288 * 5 * i) - 288 * 5)
-        df[col_name] = df['AVAILABLE BIKES'].shift((288 * 5 * i) - 288 * 5)
+        df[col_name + '-TIME'] = df["TIME"].shift((288 * 7 * i) - 288 * 7)
+        df[col_name] = df['AVAILABLE BIKES'].shift((288 * 7 * i) - 288 * 7)
 
-    df['OCCUPANCY FUTURE TIME'] = df["TIME"].shift(-288 * 5)
-    df['OCCUPANCY_FUTURE'] = df['AVAILABLE BIKES'].shift(-288 * 5)
+    df['OCCUPANCY FUTURE TIME'] = df["TIME"].shift(-288 * 7)
+    df['OCCUPANCY_FUTURE'] = df['AVAILABLE BIKES'].shift(-288 * 7)
     df.dropna(inplace=True)
     df.to_csv('my_csv.csv')
     return df
@@ -90,6 +90,7 @@ def extract_feature_set(original_df, step_size):
 def train_test_model(original_df, df):
     # df = df[df['DAY_OF_WEEK'] < 5]
     # X = df[['k-3-q', 'k-6-q', 'k-9-q', 'k-1d', 'k-2d', 'k-3d', 'k-1w', 'k-2w', 'k-3w']]
+    # X = df[['k-3-q', 'k-6-q', 'k-9-q']]
     X = df[['k-3-q', 'k-6-q', 'k-9-q']]
     # X = df[['k-1d', 'k-2d', 'k-3d', 'k-4d']]
     y = df['OCCUPANCY_FUTURE']
@@ -107,7 +108,7 @@ def plot_predictions(original_df, X, y_pred, step, station_label):
     plt.scatter(X.index, y_pred, color='yellow')
     plt.xlabel("time(month-day hour)")
     plt.ylabel("Bike Occupancy")
-    plt.title(station_label + " Predictions (" + str(step * 5) + " minutes ahead) - Recent Trends")
+    plt.title(station_label + " Predictions (" + str(step * 5) + " minutes ahead) - Weekly Pattern")
     plt.legend(["Training Data", "Predictions"], loc='lower right')
     plt.xlim([pd.to_datetime('2020-02-26', format='%Y-%m-%d'),
               pd.to_datetime('2020-02-28', format='%Y-%m-%d')])

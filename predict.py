@@ -12,14 +12,24 @@ from sklearn.linear_model import LinearRegression
 plt.rc('font', size=10)
 plt.rcParams['figure.constrained_layout.use'] = True
 
+def extract_station(dublin_bikes_df, station_name):
+    return dublin_bikes_df[dublin_bikes_df['NAME'] == station_name]
+
 # dublin_bikes = pd.read_csv('/content/drive/MyDrive/ML Final/dublinbikes_20200101_20200401.csv')
 # feature selection
 # original_df = pd.read_csv('./station_dataset/grand_canal_dock.csv',
 #                           usecols=['TIME', 'AVAILABLE BIKES'],
 #                           parse_dates=['TIME'], index_col="TIME")
-original_df = pd.read_csv('./station_dataset/brookfield-road.csv',
-                          usecols=['TIME', 'AVAILABLE BIKES'],
-                          parse_dates=['TIME'], index_col="TIME")
+# # original_df = pd.read_csv('./station_dataset/brookfield-road.csv',
+# #                           usecols=['TIME', 'AVAILABLE BIKES'],
+# #                           parse_dates=['TIME'], index_col="TIME")
+
+dublin_bikes_df = pd.read_csv('D:\AAATrinity\Machine Learning\dublinbikes_20200101_20200401.csv',
+                                  usecols=['NAME', 'BIKE STANDS', 'TIME', 'AVAILABLE BIKES'], parse_dates=['TIME'], index_col="TIME")
+
+# dublin_bikes = pd.read_csv('/content/drive/MyDrive/ML Final/dublinbikes_20200101_20200401.csv')
+original_df = extract_station(dublin_bikes_df, 'CITY QUAY')
+# original_df = extract_station(dublin_bikes_df, 'BROOKFIELD ROAD')
 
 original_df = original_df[(original_df.index >= '2020-02-04') & (original_df.index <= '2020-03-14')]
 
@@ -30,11 +40,11 @@ original_df = original_df[(original_df.index >= '2020-02-04') & (original_df.ind
 
 df = original_df
 
-df.index = df.index - pd.to_timedelta(df.index.second, unit='s')
+# df.index = df.index - pd.to_timedelta(df.index.second, unit='s')
 df["TIME"] = df.index
 
 # 10 minutes, 30 minutes, 60 minutes
-step = 12
+step = 2
 # range(1, 4) so lag is basically 3
 lag = 4
 dd = 1
@@ -133,7 +143,7 @@ plt.xlabel("time(days)")
 plt.ylabel("Bike Occupancy")
 plt.title("Grand Canal Dock Predictions (" + str(step * 5) + " minutes ahead)")
 plt.legend(["training data", "predictions"], loc='upper right')
-# plt.xlim([pd.to_datetime('2020-03-13', format='%Y-%m-%d'),
-#           pd.to_datetime('2020-03-25', format='%Y-%m-%d')])
+plt.xlim([pd.to_datetime('2020-02-25', format='%Y-%m-%d'),
+          pd.to_datetime('2020-03-07', format='%Y-%m-%d')])
 plt.xticks(rotation=15)
 plt.show()
