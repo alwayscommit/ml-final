@@ -145,7 +145,7 @@ def train_test_model(df):
     X_poly = poly.fit_transform(X)
     X_train, X_test, yTrain, yTest, t_train, t_test = (train_test_split(X_poly, y, T, random_state=0))
     model = Lasso(alpha=(1 / 0.5), max_iter=2000000).fit(X_train, yTrain)
-    y_pred = model.predict(X_poly)D:
+    y_pred = model.predict(X_poly)
     print(str.format("RMSE : {}", math.sqrt(mean_squared_error(y, y_pred))))
 
     plt.scatter(original_df.index, original_df['AVAILABLE BIKES'], color='blue')
