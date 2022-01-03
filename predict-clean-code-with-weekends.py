@@ -70,12 +70,12 @@ def extract_feature_set(original_df, step_size):
         df[col_name] = df['AVAILABLE BIKES'].shift((dd * i) + step)
 
     # number of 5 minutes intervals in a day 288
-    for i in range(1, 5):
-        col_name = 'k-' + str(5-i) + 'd'
-        df[col_name + '-TIME'] = df["TIME"].shift(-288 * i)
-        df[col_name] = df['AVAILABLE BIKES'].shift(-288 * i)
+    for i in range(1, lag):
+        col_name = 'k-' + str(lag - i) + 'd'
+        df[col_name + '-TIME'] = df["TIME"].shift(-288 * (i + 3))
+        df[col_name] = df['AVAILABLE BIKES'].shift(-288 * (i + 3))
 
-    for i in range(1, 5):
+    for i in range(1, lag):
         col_name = 'k-' + str(i) + 'w'
         df[col_name + '-TIME'] = df["TIME"].shift((288 * 7 * i) - 288 * 7)
         df[col_name] = df['AVAILABLE BIKES'].shift((288 * 7 * i) - 288 * 7)
@@ -91,8 +91,9 @@ def train_test_model(original_df, df):
     # df = df[df['DAY_OF_WEEK'] < 5]
     # X = df[['k-3-q', 'k-6-q', 'k-9-q', 'k-1d', 'k-2d', 'k-3d', 'k-1w', 'k-2w', 'k-3w']]
     # X = df[['k-3-q', 'k-6-q', 'k-9-q']]
-    X = df[['k-3-q', 'k-6-q', 'k-9-q']]
+    # X = df[['k-3-q', 'k-6-q', 'k-9-q', 'k-1d', 'k-2d', 'k-3d', 'k-1w', 'k-2w', 'k-3w']]
     # X = df[['k-1d', 'k-2d', 'k-3d', 'k-4d']]
+    X = df[['k-1d', 'k-2d', 'k-3d']]
     y = df['OCCUPANCY_FUTURE']
     X_train, X_test, yTrain, yTest = (train_test_split(X, y, random_state=0))
     linear_reg_model = LinearRegression().fit(X_train, yTrain)
@@ -108,7 +109,8 @@ def plot_predictions(original_df, X, y_pred, step, station_label):
     plt.scatter(X.index, y_pred, color='yellow')
     plt.xlabel("time(month-day hour)")
     plt.ylabel("Bike Occupancy")
-    plt.title(station_label + " Predictions (" + str(step * 5) + " minutes ahead) - Weekly Pattern")
+    plt.title(station_label + " Predictions (" + str(step * 5) + " minutes ahead) - Daily Pattern including Weekends",
+              fontsize=10)
     plt.legend(["Training Data", "Predictions"], loc='lower right')
     plt.xlim([pd.to_datetime('2020-02-26', format='%Y-%m-%d'),
               pd.to_datetime('2020-02-28', format='%Y-%m-%d')])
@@ -119,27 +121,34 @@ def plot_predictions(original_df, X, y_pred, step, station_label):
 def report_parameters(trained_model, step_q):
     feature_weights_table = PrettyTable(
         # ['Step(q)',
-        #  'k-3-q', 'k-6-q', 'k-9-q',
-        #  'k-1d', 'k-2d', 'k-3d',
+        # 'k-3-q', 'k-6-q', 'k-9-q',
+        # 'k-1d', 'k-2d', 'k-3d',
         #  'k-1w', 'k-2w', 'k-3w'])
         ['Step(q)',
-         'k-3-q', 'k-6-q', 'k-9-q'])
-        # ['Step(q)',
-        #  'k-1d', 'k-2d', 'k-3d', 'k-4d'])
+         'k-1d', 'k-2d', 'k-3d'])
+    # ['Step(q)',
+    #  'k-3-q', 'k-6-q', 'k-9-q', 'k-1d', 'k-2d', 'k-3d', 'k-1w', 'k-2w', 'k-3w'])
     feature_weights_table.add_row(
         [step_q,
          trained_model.coef_[0],
          trained_model.coef_[1],
          trained_model.coef_[2],
-         # trained_model.coef_[3]
+         # trained_model.coef_[3],
+         # trained_model.coef_[4],
+         # trained_model.coef_[5],
+         # trained_model.coef_[6],
+         # trained_model.coef_[7],
+         # trained_model.coef_[8],
+         # trained_model.coef_[9]
          ])
     print(feature_weights_table)
 
 
 def engineer_features(df, step_size):
-    X = df[['k-3-q', 'k-6-q', 'k-9-q']]
+    # X = df[['k-3-q', 'k-6-q', 'k-9-q']]
+    X = df[['k-1d', 'k-2d', 'k-3d']]
     # X = df[['k-1w', 'k-2w', 'k-3w', 'k-4w']]
-    # X = df[['k-1d', 'k-2d', 'k-3d', 'k-4d']]
+    # X = df[['k-3-q', 'k-6-q', 'k-9-q', 'k-1d', 'k-2d', 'k-3d', 'k-1w', 'k-2w', 'k-3w']]
     y = df['OCCUPANCY_FUTURE']
     linear_reg_model = LinearRegression().fit(X, y)
     report_parameters(linear_reg_model, step_size)
@@ -157,8 +166,8 @@ def main():
     dublin_bikes_df = pd.read_csv('D:\AAATrinity\Machine Learning\dublinbikes_20200101_20200401.csv',
                                   usecols=['NAME', 'TIME', 'AVAILABLE BIKES'], parse_dates=['TIME'], index_col="TIME")
 
-    # station_df = extract_station(dublin_bikes_df, 'CITY QUAY')
-    station_df = extract_station(dublin_bikes_df, 'BROOKFIELD ROAD')
+    station_df = extract_station(dublin_bikes_df, 'CITY QUAY')
+    # station_df = extract_station(dublin_bikes_df, 'BROOKFIELD ROAD')
 
     original_df = select_datetime_range(station_df, '2020-02-04', '2020-03-14')
     original_df = select_features(original_df)
@@ -175,8 +184,8 @@ def main():
     df = extract_feature_set(original_df, step)
     engineer_features(df, step)
     X, y_pred = train_test_model(original_df, df)
-    # plot_predictions(df, X, y_pred, step, 'City Quay')
-    plot_predictions(df, X, y_pred, step, 'Brookfield Road')
+    plot_predictions(df, X, y_pred, step, 'City Quay')
+    # plot_predictions(df, X, y_pred, step, 'Brookfield Road')
 
 
 if __name__ == '__main__':
